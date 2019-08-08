@@ -1,0 +1,77 @@
+<dashboard>
+  <search id="lsm_analyse_sources">
+    <query>| savedsearch lsm_analyse_sources</query>
+    <earliest>1</earliest>
+    <latest>now</latest>
+    <sampleRatio>1</sampleRatio>
+  </search>
+  <label>Log Source Monitoring</label>
+  <row>
+    <panel>
+      <title>Monitored invalid sources</title>
+      <table>
+        <search base="lsm_analyse_sources">
+          <query>| where status != "ok" | `lsm_format_source_table_debug`</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="number" field="Status"></format>
+        <format type="color" field="Status">
+          <colorPalette type="map">{"outage":#DC4E41,"underload":#F8BE34,"overload":#F1813F}</colorPalette>
+        </format>
+        <format type="color" field="%">
+          <colorPalette type="minMidMax" maxColor="#DC4E41" minColor="#FFFFFF"></colorPalette>
+          <scale type="minMidMax"></scale>
+        </format>
+        <drilldown>
+          <link target="_blank">search?q=index=*%20host=%22$row.Host$%22%20source=%22$row.Source$%22&amp;earliest=-24h@h&amp;latest=now</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Monitored valid sources</title>
+      <table>
+        <search base="lsm_analyse_sources">
+          <query>| where status == "ok" | `lsm_format_source_table_debug`</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Disabled monitors (click to enable)</title>
+      <table>
+        <search>
+          <query>| inputlookup lsm_sources | search enabled=false | table host,source,maxAge,maxStdDev</query>
+          <earliest>-4h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <link target="_self">search?q=%7C%20%60lsm_toggle_enabled(%22$row.host$%22,%22$row.source$%22)%60&amp;earliest=$earliest$&amp;latest=$latest$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</dashboard>
